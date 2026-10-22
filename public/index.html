@@ -1,0 +1,43 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Number Duel</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101114;color:white;font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh;padding:20px}
+main{width:100%;max-width:420px;background:#1b1c22;border:1px solid #34353d;border-radius:24px;padding:25px}
+h1{text-align:center;letter-spacing:3px}
+p{color:#b9bac5;text-align:center}
+input,button{width:100%;padding:15px;margin-top:12px;border-radius:12px;font-size:16px}
+input{background:#101114;color:white;border:1px solid #454650}
+button{background:#8b5cf6;color:white;border:0;font-weight:bold}
+#status{margin-top:20px;min-height:45px}
+</style>
+</head>
+<body>
+<main>
+<h1>NUMBER DUEL</h1>
+<p>Two players. One secret number.</p>
+<input id="name" placeholder="Your name">
+<button onclick="createRoom()">Create Room</button>
+<input id="room" placeholder="Room code">
+<button onclick="joinRoom()">Join Room</button>
+<div id="status">Ready to play?</div>
+</main>
+<script>
+function createRoom(){
+ document.getElementById('status').textContent=
+ 'Online room server is being connected.';
+}
+function joinRoom(){
+ const code=document.getElementById('room').value.trim();
+ document.getElementById('status').textContent=code?
+ 'Room code: '+code:'Enter a room code first.';
+}
+</script>
+</body>
+</html>
