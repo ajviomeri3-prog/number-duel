@@ -1,43 +1,105 @@
 
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sq">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Number Duel</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#101114;color:white;font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh;padding:20px}
-main{width:100%;max-width:420px;background:#1b1c22;border:1px solid #34353d;border-radius:24px;padding:25px}
-h1{text-align:center;letter-spacing:3px}
-p{color:#b9bac5;text-align:center}
-input,button{width:100%;padding:15px;margin-top:12px;border-radius:12px;font-size:16px}
-input{background:#101114;color:white;border:1px solid #454650}
-button{background:#8b5cf6;color:white;border:0;font-weight:bold}
-#status{margin-top:20px;min-height:45px}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Number Duel 🎮</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: Arial, sans-serif;
+      background: #101323;
+      color: white;
+      text-align: center;
+    }
+    .game {
+      max-width: 420px;
+      margin: 35px auto;
+      padding: 24px;
+      background: #202640;
+      border-radius: 20px;
+    }
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button {
+      background: #6c63ff;
+      color: white;
+      font-weight: bold;
+    }
+    input { background: white; }
+    #status { margin-top: 20px; min-height: 48px; }
+  </style>
 </head>
 <body>
-<main>
-<h1>NUMBER DUEL</h1>
-<p>Two players. One secret number.</p>
-<input id="name" placeholder="Your name">
-<button onclick="createRoom()">Create Room</button>
-<input id="room" placeholder="Room code">
-<button onclick="joinRoom()">Join Room</button>
-<div id="status">Ready to play?</div>
-</main>
-<script>
-function createRoom(){
- document.getElementById('status').textContent=
- 'Online room server is being connected.';
-}
-function joinRoom(){
- const code=document.getElementById('room').value.trim();
- document.getElementById('status').textContent=code?
- 'Room code: '+code:'Enter a room code first.';
-}
-</script>
+  <div class="game">
+    <h1>🎮 Number Duel</h1>
+    <p>Gjej numrin nga 1 deri në 100!</p>
+
+    <button id="create">Krijo dhomë</button>
+    <input id="room" placeholder="Shkruaj kodin e dhomës">
+    <button id="join">Bashkohu në dhomë</button>
+
+    <hr style="margin-top:24px">
+
+    <input id="guess" type="number" min="1" max="100"
+      placeholder="Numri yt (1–100)">
+    <button id="send">Provo numrin</button>
+
+    <p id="status">Duke u lidhur me serverin...</p>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const status = document.getElementById("status");
+    const roomInput = document.getElementById("room");
+    let roomCode = "";
+
+    socket.on("connect", () => {
+      status.textContent = "U lidhëm! Krijo ose bashkohu në një dhomë.";
+    });
+
+    socket.on("connect_error", () => {
+      status.textContent = "Nuk lidhet me serverin. Provo ta rifreskosh faqen.";
+    });
+
+    document.getElementById("create").onclick = () => {
+      socket.emit("createRoom");
+    };
+
+    socket.on("roomCreated", (code) => {
+      roomCode = code;
+      roomInput.value = code;
+      status.textContent = "Dhoma u krijua! Dërgoja kodin shokut: " + code;
+    });
+
+    document.getElementById("join").onclick = () => {
+      roomCode = roomInput.value.trim().toUpperCase();
+      socket.emit("joinRoom", roomCode);
+    };
+
+    document.getElementById("send").onclick = () => {
+      const number = Number(document.getElementById("guess").value);
+      if (!roomCode) {
+        status.textContent = "Krijo një dhomë ose bashkohu me një kod!";
+        return;
+      }
+      socket.emit("guess", { code: roomCode, number });
+    };
+
+    socket.on("gameMessage", (message) => {
+      status.textContent = message;
+    });
+  </script>
 </body>
 </html>
